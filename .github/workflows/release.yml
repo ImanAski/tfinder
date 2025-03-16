@@ -1,0 +1,44 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags starting with v (e.g., v1.0.0)
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21' # Specify your Go version
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Build for multiple platforms
+        run: |
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -o dist/tfinder-linux-amd64 -ldflags="-X main.version=${{ env.VERSION }}" ./main.go
+          GOOS=windows GOARCH=amd64 go build -o dist/tfinder-windows-amd64.exe -ldflags="-X main.version=${{ env.VERSION }}" ./main.go
+          GOOS=darwin GOARCH=amd64 go build -o dist/tfinder-darwin-amd64 -ldflags="-X main.version=${{ env.VERSION }}" ./main.go
+          GOOS=darwin GOARCH=arm64 go build -o dist/tfinder-darwin-arm64 -ldflags="-X main.version=${{ env.VERSION }}" ./main.go
+
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/tfinder-linux-amd64
+            dist/tfinder-windows-amd64.exe
+            dist/tfinder-darwin-amd64
+            dist/tfinder-darwin-arm64
