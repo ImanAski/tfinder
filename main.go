@@ -19,7 +19,6 @@ type TodoItem struct {
 	Comment string
 }
 
-// BUG: this is a bug
 var commentPatterns = []*regexp.Regexp{
 	// Single line comments
 	regexp.MustCompile(`^\s*\/\/(.+)$`), // C, C++, Go, Java, JavaScript, etc.
@@ -119,6 +118,12 @@ func main() {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
+
+		// Increase the buffer size to 1MB for now
+		const maxCapacity = 1024 * 1024
+		buf := make([]byte, maxCapacity)
+		scanner.Buffer(buf, maxCapacity)
+
 		lineNum := 0
 		for scanner.Scan() {
 			lineNum++
@@ -185,7 +190,6 @@ func main() {
 		return
 	}
 
-	fmt.Println("Found some items ->")
 	for i, item := range items {
 		fmt.Printf("%d. [%s] %s (line %d): \n%s\n\n",
 			i+1,
