@@ -95,7 +95,7 @@ Colors are specified using the format `foreground:bg-background`. Available colo
 - purple
 - cyan
 
-**Background Colors:**
+**Background Colors:(THIS IS A WORK IN PROGRESS)**
 - bg-red
 - bg-green
 - bg-yellow
